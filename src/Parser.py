@@ -11,7 +11,7 @@ class Parser:
     def parse(self):
         while self.hasMoreCommands():
             self.advance()
-            self.asmCmds += [self.curCmd]
+            self.asmCmds += [self.curCmd.strip()]
 
     def hasMoreCommands(self):
         if self.nextCmd: return True

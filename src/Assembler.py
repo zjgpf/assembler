@@ -1,5 +1,6 @@
 from Parser import Parser
 from Code import Code
+from SymbolTable import SymbolTable
 import sys
 import os
 import pdb
@@ -8,6 +9,8 @@ DEFAULTPATH='/Users/pengfeigao/git/assembler/test/add/Add.asm'
 DEFAULTPATH='/Users/pengfeigao/git/assembler/test/max/MaxL.asm'
 DEFAULTPATH='/Users/pengfeigao/git/assembler/test/pong/PongL.asm'
 DEFAULTPATH='/Users/pengfeigao/git/assembler/test/Rect/RectL.asm'
+DEFAULTPATH='/Users/pengfeigao/git/assembler/test/max/Max.asm'
+#DEFAULTPATH='/Users/pengfeigao/git/assembler/test/Rect/Rect.asm'
 
 class Assembler:
     def __init__(self, inputPath):
@@ -20,18 +23,32 @@ class Assembler:
 
     def run(self, isWrite=True):
         parser = Parser(self.content)
+        symbolTable = SymbolTable()
         hackCmds = self.hackCmds
         asmCmds = parser.asmCmds
         print(asmCmds)
 
+        lineNum = 0
+        for asmCmd in asmCmds:
+            commandType = parser.commandType(asmCmd)
+            if commandType == 'L':
+                symbol = parser.symbol(asmCmd)
+                symbolTable.addEntry(symbol, lineNum+1)
+            else: lineNum += 1
+
+        ramNo = 16
         for asmCmd in asmCmds:
             commandType = parser.commandType(asmCmd)
 
-            if commandType in ['A','L']: 
+            if commandType in ['A','L']:
                 symbol = parser.symbol(asmCmd)
-                print('symbol:', symbol)
-                hackCmds += ['0'+decimalToBinary15(symbol)+ '\n']
-
+                if symbolTable.contains(symbol):
+                    address = symbolTable.getAddress(symbol)
+                else:
+                    symbolTable.addEntry(symbol,ramNo)
+                    address = ramNo
+                    ramNo+=1
+                hackCmds += ['0'+decimalToBinary15(address)+ '\n']
             elif commandType == 'C':
                 dest = parser.dest(asmCmd)
                 print('dest:', dest)
