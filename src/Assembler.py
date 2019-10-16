@@ -10,7 +10,8 @@ DEFAULTPATH='/Users/pengfeigao/git/assembler/test/max/MaxL.asm'
 DEFAULTPATH='/Users/pengfeigao/git/assembler/test/pong/PongL.asm'
 DEFAULTPATH='/Users/pengfeigao/git/assembler/test/Rect/RectL.asm'
 DEFAULTPATH='/Users/pengfeigao/git/assembler/test/max/Max.asm'
-#DEFAULTPATH='/Users/pengfeigao/git/assembler/test/Rect/Rect.asm'
+DEFAULTPATH='/Users/pengfeigao/git/assembler/test/Rect/Rect.asm'
+DEFAULTPATH='/Users/pengfeigao/git/assembler/test/pong/Pong.asm'
 
 class Assembler:
     def __init__(self, inputPath):
@@ -33,7 +34,7 @@ class Assembler:
             commandType = parser.commandType(asmCmd)
             if commandType == 'L':
                 symbol = parser.symbol(asmCmd)
-                symbolTable.addEntry(symbol, lineNum+1)
+                symbolTable.addEntry(symbol, lineNum)
             else: lineNum += 1
 
         ramNo = 16
@@ -42,13 +43,15 @@ class Assembler:
 
             if commandType in ['A','L']:
                 symbol = parser.symbol(asmCmd)
-                if symbolTable.contains(symbol):
-                    address = symbolTable.getAddress(symbol)
-                else:
-                    symbolTable.addEntry(symbol,ramNo)
-                    address = ramNo
-                    ramNo+=1
-                hackCmds += ['0'+decimalToBinary15(address)+ '\n']
+                if not symbol.isdigit():
+                    if symbolTable.contains(symbol):
+                        address = symbolTable.getAddress(symbol)
+                    else:
+                        symbolTable.addEntry(symbol,ramNo)
+                        address = ramNo
+                        ramNo+=1
+                else: address = symbol
+                if commandType == 'A': hackCmds += ['0'+decimalToBinary15(address)+ '\n']
             elif commandType == 'C':
                 dest = parser.dest(asmCmd)
                 print('dest:', dest)
